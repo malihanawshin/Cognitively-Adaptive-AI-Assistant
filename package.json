@@ -1,0 +1,115 @@
+{
+  "name": "cognitively-adaptive-ai-assistant",
+  "displayName": "Cognitively Adaptive AI Assistant",
+  "description": "An AI coding assistant with configurable interaction patterns designed for diverse cognitive styles",
+  "version": "0.1.0",
+  "publisher": "your-name",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI Programming",
+    "Developer Tools"
+  ],
+  "activationEvents": [
+    "onCommand:adaptiveAIPanel.open",
+    "onCommand:adaptiveAI.focusMode",
+    "onCommand:adaptiveAI.toggleVerbosity",
+    "onCommand:adaptiveAI.decomposeTask"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "Cognitively Adaptive AI",
+      "properties": {
+        "adaptiveAI.explanationVerbosity": {
+          "type": "string",
+          "default": "standard",
+          "enum": ["brief", "standard", "detailed"],
+          "description": "Controls how detailed AI explanations should be"
+        },
+        "adaptiveAI.focusModeEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "When enabled, suppresses non-essential AI suggestions"
+        },
+        "adaptiveAI.llmProvider": {
+          "type": "string",
+          "default": "openai",
+          "enum": ["openai", "anthropic", "ollama"],
+          "description": "LLM provider to use"
+        },
+        "adaptiveAI.openAIModel": {
+          "type": "string",
+          "default": "gpt-4o",
+          "description": "OpenAI model to use (e.g., gpt-4o, gpt-4-turbo)"
+        },
+        "adaptiveAI.anthropicModel": {
+          "type": "string",
+          "default": "claude-3-5-sonnet-latest",
+          "description": "Anthropic model to use"
+        },
+        "adaptiveAI.ollamaModel": {
+          "type": "string",
+          "default": "llama3",
+          "description": "Ollama local model to use"
+        },
+        "adaptiveAI.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for the LLM provider (or set OPENAI_API_KEY env var)"
+        },
+        "adaptiveAI.ollamaBaseUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Base URL for Ollama API"
+        },
+        "adaptiveAI.idleDetectionEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically enable focus mode when window is idle"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "adaptiveAIPanel.open",
+        "title": "Open Adaptive AI Panel",
+        "shortDescription": "Opens the Cognitively Adaptive AI Assistant chat panel"
+      },
+      {
+        "command": "adaptiveAI.focusMode",
+        "title": "Toggle Focus Mode",
+        "shortDescription": "Toggle focus mode to suppress non-essential AI suggestions"
+      },
+      {
+        "command": "adaptiveAI.toggleVerbosity",
+        "title": "Cycle Explanation Verbosity",
+        "shortDescription": "Cycle through brief/standard/detailed explanation modes"
+      },
+      {
+        "command": "adaptiveAI.decomposeTask",
+        "title": "Decompose Current Task",
+        "shortDescription": "Break the current coding task into structured steps"
+      }
+    ],
+    "views": {}
+  },
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "openai": "^4.67.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/test-electron": "^2.3.0",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.3.0"
+  }
+}

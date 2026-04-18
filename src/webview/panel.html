@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adaptive AI Assistant</title>
+  <style>
+    :root {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #252526;
+      --bg-input: #3c3c3c;
+      --text-primary: #cccccc;
+      --text-secondary: #858585;
+      --accent: #007acc;
+      --success: #4ec9b0;
+      --warning: #dcdcaa;
+      --error: #f14c4c;
+      --border: #3c3c3c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 12px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .header h1 { font-size: 14px; font-weight: 600; color: var(--accent); }
+    .controls { display: flex; gap: 8px; }
+    .controls button {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .controls button:hover { background: var(--bg-secondary); }
+    .controls button.active { border-color: var(--accent); color: var(--accent); }
+    .chat-container { flex: 1; overflow-y: auto; margin-bottom: 12px; }
+    .message { margin-bottom: 12px; padding: 8px 12px; border-radius: 6px; max-width: 90%; }
+    .message.user { background: var(--accent); color: white; margin-left: auto; }
+    .message.assistant { background: var(--bg-secondary); border: 1px solid var(--border); }
+    .message .role { font-size: 10px; text-transform: uppercase; opacity: 0.7; margin-bottom: 4px; }
+    .message pre {
+      background: var(--bg-input);
+      padding: 8px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .steps-container { background: var(--bg-secondary); border: 1px solid var(--success); border-radius: 6px; padding: 12px; }
+    .steps-container h3 { color: var(--success); margin-bottom: 8px; font-size: 12px; }
+    .steps-container ol { padding-left: 20px; }
+    .steps-container li { margin-bottom: 6px; font-size: 13px; line-height: 1.4; }
+    .steps-container .ack-btn {
+      margin-top: 12px;
+      background: var(--success);
+      color: var(--bg-primary);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .steps-container .ack-btn:hover { opacity: 0.9; }
+    .input-area { display: flex; gap: 8px; }
+    .input-area textarea {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      resize: none;
+      min-height: 60px;
+      font-family: inherit;
+    }
+    .input-area textarea:focus { outline: none; border-color: var(--accent); }
+    .input-area button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .input-area button:hover { opacity: 0.9; }
+    .input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .notification {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--error);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      z-index: 100;
+    }
+    .notification.success { background: var(--success); color: var(--bg-primary); }
+    .notification.hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Adaptive AI Assistant</h1>
+    <div class="controls">
+      <button id="focusModeBtn" title="Toggle Focus Mode">Focus: OFF</button>
+      <button id="verbosityBtn" title="Cycle Explanation Verbosity">Standard</button>
+      <button id="clearBtn" title="Clear Chat History">Clear</button>
+    </div>
+  </div>
+
+  <div class="chat-container" id="chatContainer"></div>
+
+  <div id="stepsContainer" class="steps-container" style="display: none;">
+    <h3>Task Decomposition</h3>
+    <ol id="stepsList"></ol>
+    <button class="ack-btn" id="ackBtn">Proceed with Full Code</button>
+  </div>
+
+  <div class="input-area" id="inputArea">
+    <textarea id="messageInput" placeholder="Ask me anything about your code..."></textarea>
+    <button id="sendBtn">Send</button>
+  </div>
+
+  <div id="notification" class="notification hidden"></div>
+
+  <script>
+    const vscode = acquireVsCodeApi();
+    const chatContainer = document.getElementById('chatContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const focusModeBtn = document.getElementById('focusModeBtn');
+    const verbosityBtn = document.getElementById('verbosityBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const stepsContainer = document.getElementById('stepsContainer');
+    const stepsList = document.getElementById('stepsList');
+    const ackBtn = document.getElementById('ackBtn');
+    const inputArea = document.getElementById('inputArea');
+    const notification = document.getElementById('notification');
+
+    let isLoading = false;
+    let currentVerbosity = 'standard';
+    let focusModeActive = false;
+
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+    focusModeBtn.addEventListener('click', () => vscode.postMessage({ type: 'toggleFocusMode' }));
+    verbosityBtn.addEventListener('click', () => vscode.postMessage({ type: 'cycleVerbosity' }));
+    clearBtn.addEventListener('click', () => {
+      chatContainer.innerHTML = '';
+      vscode.postMessage({ type: 'clearHistory' });
+    });
+    ackBtn.addEventListener('click', () => {
+      stepsContainer.style.display = 'none';
+      inputArea.style.display = 'flex';
+      vscode.postMessage({ type: 'acknowledgeSteps' });
+    });
+
+    function sendMessage() {
+      const content = messageInput.value.trim();
+      if (!content || isLoading) { return; }
+      messageInput.value = '';
+      addMessage('user', content);
+      vscode.postMessage({ type: 'sendMessage', payload: content });
+    }
+
+    function addMessage(role, content) {
+      const div = document.createElement('div');
+      div.className = 'message ' + role;
+      const roleLabel = role === 'user' ? 'You' : 'Adaptive AI';
+      div.innerHTML = '<div class="role">' + roleLabel + '</div><div>' + formatContent(content) + '</div>';
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function formatContent(content) {
+      return content
+        .replace(/```(\w+)?/g, '<pre><code>')
+        .replace(/```/g, '</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function showSteps(steps) {
+      stepsList.innerHTML = '';
+      steps.forEach(step => {
+        const li = document.createElement('li');
+        li.textContent = step;
+        stepsList.appendChild(li);
+      });
+      inputArea.style.display = 'none';
+      stepsContainer.style.display = 'block';
+    }
+
+    function showNotification(message, isError = false) {
+      notification.textContent = message;
+      notification.className = 'notification ' + (isError ? 'error' : 'success');
+      notification.classList.remove('hidden');
+      setTimeout(() => notification.classList.add('hidden'), 3000);
+    }
+
+    window.addEventListener('message', (e) => {
+      const { type, payload } = e.data;
+      switch (type) {
+        case 'addMessage':
+          addMessage(payload.role, payload.content);
+          isLoading = false;
+          sendBtn.disabled = false;
+          break;
+        case 'setLoading':
+          isLoading = payload;
+          sendBtn.disabled = payload;
+          if (payload) { addMessage('assistant', 'Thinking...'); }
+          else {
+            const lastMsg = chatContainer.lastElementChild;
+            if (lastMsg && lastMsg.textContent === 'Thinking...') { lastMsg.remove(); }
+          }
+          break;
+        case 'enterDecomposeMode':
+          showNotification('Decompose mode: paste or describe your task');
+          break;
+        case 'showSteps':
+          showSteps(payload);
+          break;
+        case 'showNotification':
+          showNotification(payload.message, payload.isError);
+          break;
+        case 'updateFocusMode':
+          focusModeActive = payload;
+          focusModeBtn.textContent = 'Focus: ' + (payload ? 'ON' : 'OFF');
+          focusModeBtn.classList.toggle('active', payload);
+          break;
+        case 'updateVerbosity':
+          currentVerbosity = payload;
+          verbosityBtn.textContent = payload.charAt(0).toUpperCase() + payload.slice(1);
+          break;
+      }
+    });
+
+    messageInput.focus();
+  </script>
+</body>
+</html>
