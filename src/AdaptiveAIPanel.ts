@@ -85,11 +85,13 @@ export class AdaptiveAIPanel implements vscode.Disposable {
         break;
       case 'toggleFocusMode':
         await this.focusModeManager.toggle();
-        this.updateStatusBar();
+        const updatedSettings = this.settingsManager.getSettings();
+        this.panel?.webview.postMessage({ type: 'updateFocusMode', payload: updatedSettings.focusModeEnabled });
         break;
       case 'cycleVerbosity':
         await this.settingsManager.cycleVerbosity();
-        this.updateStatusBar();
+        const newSettings = this.settingsManager.getSettings();
+        this.panel?.webview.postMessage({ type: 'updateVerbosity', payload: newSettings.explanationVerbosity });
         break;
       case 'clearHistory':
         this.messageHistory = [];
