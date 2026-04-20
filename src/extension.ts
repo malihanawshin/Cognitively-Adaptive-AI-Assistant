@@ -27,6 +27,12 @@ export function activate(context: vscode.ExtensionContext) {
     panel.panel?.webview.postMessage({ type: 'updateVerbosity', payload: settings.explanationVerbosity });
   });
 
+  const cycleResponseDelayCmd = vscode.commands.registerCommand('adaptiveAI.cycleResponseDelay', async () => {
+    await settingsManager.cycleResponseDelay();
+    const settings = settingsManager.getSettings();
+    panel.panel?.webview.postMessage({ type: 'updateResponseDelay', payload: settings.responseDelay });
+  });
+
   const decomposeTaskCmd = vscode.commands.registerCommand('adaptiveAI.decomposeTask', async () => {
     await panel.decomposeTask();
   });
@@ -38,6 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
     openPanelCmd,
     focusModeCmd,
     cycleVerbosityCmd,
+    cycleResponseDelayCmd,
     decomposeTaskCmd,
     panel
   );

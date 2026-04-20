@@ -93,6 +93,11 @@ export class AdaptiveAIPanel implements vscode.Disposable {
         const newSettings = this.settingsManager.getSettings();
         this.panel?.webview.postMessage({ type: 'updateVerbosity', payload: newSettings.explanationVerbosity });
         break;
+      case 'cycleResponseDelay':
+        await this.settingsManager.cycleResponseDelay();
+        const delaySettings = this.settingsManager.getSettings();
+        this.panel?.webview.postMessage({ type: 'updateResponseDelay', payload: delaySettings.responseDelay });
+        break;
       case 'clearHistory':
         this.messageHistory = [];
         break;

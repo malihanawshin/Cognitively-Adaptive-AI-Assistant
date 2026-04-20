@@ -1,6 +1,6 @@
 # Cognitively Adaptive AI Assistant
 
-A VS Code extension integrating large language models with cognitively inclusive interaction patterns — designed with diverse cognitive styles in mind.
+A VS Code extension integrating large language models with cognitively inclusive interaction patterns — designed for diverse cognitive styles.
 
 ## Features
 
@@ -15,6 +15,12 @@ Suppresses non-essential AI suggestions during active coding sessions. Toggle ma
 
 ### Structured Task Decomposition
 Before generating code, the AI breaks your task into numbered steps you must acknowledge — providing explicit structure for those who benefit from it.
+
+### Response Speed Control
+Adjustable delay before AI responses appear:
+- **Fast** — Instant responses for quick iterations
+- **Normal** — Slight pause for processing
+- **Slow** — Longer delay for those who need more time between responses
 
 ## Motivation
 
@@ -31,6 +37,7 @@ AI-powered programming tools are overwhelmingly designed for neurotypical workfl
 {
   "adaptiveAI.explanationVerbosity": "standard",
   "adaptiveAI.focusModeEnabled": false,
+  "adaptiveAI.responseDelay": "normal",
   "adaptiveAI.llmProvider": "openai",
   "adaptiveAI.openAIModel": "gpt-4o",
   "adaptiveAI.apiKey": "your-api-key"
@@ -60,19 +67,12 @@ Press `F5` in VS Code to launch the extension in development mode.
 ```
 src/
 ├── extension.ts         # Entry point, registers commands
-├── AdaptiveAIPanel.ts   # Webview panel + message handling
-├── SettingsManager.ts   # Configuration management
-├── FocusModeManager.ts  # Focus mode state + idle detection
+├── AdaptiveAIPanel.ts  # Webview panel + message handling
+├── SettingsManager.ts  # Configuration management
+├── FocusModeManager.ts # Focus mode state + idle detection
 └── llm/
-    └── LLMProvider.ts    # Unified LLM interface (OpenAI/Anthropic/Ollama)
+    └── LLMProvider.ts   # Unified LLM interface (OpenAI/Anthropic/Ollama)
 ```
-
-## Project Status
-
-This is an early-stage prototype developed as part of a PhD application. The goal is to demonstrate:
-1. VS Code extension development with the webview API
-2. LLM integration with configurable interaction parameters
-3. Modular architecture separating concerns (LLM, settings, focus mode)
 
 ## License
 

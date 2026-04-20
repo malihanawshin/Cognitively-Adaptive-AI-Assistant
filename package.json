@@ -67,6 +67,12 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically enable focus mode when window is idle"
+        },
+        "adaptiveAI.responseDelay": {
+          "type": "string",
+          "default": "normal",
+          "enum": ["fast", "normal", "slow"],
+          "description": "Delay before AI responses appear (fast=instant, normal=slight pause, slow=longer for processing)"
         }
       }
     },
@@ -90,6 +96,11 @@
         "command": "adaptiveAI.decomposeTask",
         "title": "Decompose Current Task",
         "shortDescription": "Break the current coding task into structured steps"
+      },
+      {
+        "command": "adaptiveAI.cycleResponseDelay",
+        "title": "Cycle Response Speed",
+        "shortDescription": "Cycle through fast/normal/slow AI response speeds"
       }
     ],
     "views": {}

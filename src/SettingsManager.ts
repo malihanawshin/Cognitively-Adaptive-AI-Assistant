@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 export type VerbosityLevel = 'brief' | 'standard' | 'detailed';
 export type LLMProviderType = 'openai' | 'anthropic' | 'ollama';
+export type ResponseDelayLevel = 'fast' | 'normal' | 'slow';
 
 export interface AdaptiveAISettings {
   explanationVerbosity: VerbosityLevel;
@@ -13,6 +14,7 @@ export interface AdaptiveAISettings {
   apiKey: string;
   ollamaBaseUrl: string;
   idleDetectionEnabled: boolean;
+  responseDelay: ResponseDelayLevel;
 }
 
 const VERBOSITY_CYCLE: VerbosityLevel[] = ['brief', 'standard', 'detailed'];
@@ -36,6 +38,7 @@ export class SettingsManager {
       apiKey: config.get('apiKey') as string || process.env.OPENAI_API_KEY || '',
       ollamaBaseUrl: config.get('ollamaBaseUrl') as string || 'http://localhost:11434',
       idleDetectionEnabled: config.get('idleDetectionEnabled') as boolean || true,
+      responseDelay: (config.get('responseDelay') as ResponseDelayLevel) || 'normal',
     };
   }
 
@@ -45,6 +48,20 @@ export class SettingsManager {
     const nextIndex = (currentIndex + 1) % VERBOSITY_CYCLE.length;
     await this.updateSetting('explanationVerbosity', VERBOSITY_CYCLE[nextIndex]);
     vscode.window.showInformationMessage(`Explanation verbosity set to: ${VERBOSITY_CYCLE[nextIndex]}`);
+  }
+
+  async cycleResponseDelay(): Promise<void> {
+    const delayLevels: ResponseDelayLevel[] = ['fast', 'normal', 'slow'];
+    const settings = this.getSettings();
+    const currentIndex = delayLevels.indexOf(settings.responseDelay);
+    const nextIndex = (currentIndex + 1) % delayLevels.length;
+    await this.updateSetting('responseDelay', delayLevels[nextIndex]);
+    const delayMessages = {
+      fast: 'Lightning fast responses',
+      normal: 'Normal response pace',
+      slow: 'Slower responses for processing'
+    };
+    vscode.window.showInformationMessage(`Response speed: ${delayMessages[delayLevels[nextIndex]]}`);
   }
 
   async setFocusMode(enabled: boolean): Promise<void> {
@@ -65,5 +82,15 @@ export class SettingsManager {
       detailed: 'Provide thorough, step-by-step explanations. Include edge cases and alternatives.'
     };
     return instructions[settings.explanationVerbosity];
+  }
+
+  getResponseDelayMs(): number {
+    const settings = this.getSettings();
+    const delays: Record<ResponseDelayLevel, number> = {
+      fast: 0,
+      normal: 500,
+      slow: 1500
+    };
+    return delays[settings.responseDelay];
   }
 }

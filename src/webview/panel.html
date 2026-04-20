@@ -127,6 +127,7 @@
     <div class="controls">
       <button id="focusModeBtn" title="Toggle Focus Mode">Focus: OFF</button>
       <button id="verbosityBtn" title="Cycle Explanation Verbosity">Standard</button>
+      <button id="delayBtn" title="Cycle Response Speed">Speed: Normal</button>
       <button id="clearBtn" title="Clear Chat History">Clear</button>
     </div>
   </div>
@@ -153,6 +154,7 @@
     const sendBtn = document.getElementById('sendBtn');
     const focusModeBtn = document.getElementById('focusModeBtn');
     const verbosityBtn = document.getElementById('verbosityBtn');
+    const delayBtn = document.getElementById('delayBtn');
     const clearBtn = document.getElementById('clearBtn');
     const stepsContainer = document.getElementById('stepsContainer');
     const stepsList = document.getElementById('stepsList');
@@ -163,6 +165,7 @@
     let isLoading = false;
     let currentVerbosity = 'standard';
     let focusModeActive = false;
+    let currentResponseDelay = 'normal';
 
     messageInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -174,6 +177,7 @@
     sendBtn.addEventListener('click', sendMessage);
     focusModeBtn.addEventListener('click', () => vscode.postMessage({ type: 'toggleFocusMode' }));
     verbosityBtn.addEventListener('click', () => vscode.postMessage({ type: 'cycleVerbosity' }));
+    delayBtn.addEventListener('click', () => vscode.postMessage({ type: 'cycleResponseDelay' }));
     clearBtn.addEventListener('click', () => {
       chatContainer.innerHTML = '';
       vscode.postMessage({ type: 'clearHistory' });
@@ -197,7 +201,19 @@
       div.className = 'message ' + role;
       const roleLabel = role === 'user' ? 'You' : 'Adaptive AI';
       div.innerHTML = '<div class="role">' + roleLabel + '</div><div>' + formatContent(content) + '</div>';
+      div.style.opacity = '0';
       chatContainer.appendChild(div);
+
+      if (role === 'assistant') {
+        const delayMs = currentResponseDelay === 'fast' ? 0 : currentResponseDelay === 'normal' ? 500 : 1500;
+        setTimeout(() => {
+          div.style.transition = 'opacity 0.3s ease';
+          div.style.opacity = '1';
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, delayMs);
+      } else {
+        div.style.opacity = '1';
+      }
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
@@ -263,6 +279,11 @@
         case 'updateVerbosity':
           currentVerbosity = payload;
           verbosityBtn.textContent = payload.charAt(0).toUpperCase() + payload.slice(1);
+          break;
+        case 'updateResponseDelay':
+          currentResponseDelay = payload;
+          const delayLabels = { fast: 'Fast', normal: 'Normal', slow: 'Slow' };
+          delayBtn.textContent = 'Speed: ' + delayLabels[payload];
           break;
       }
     });
