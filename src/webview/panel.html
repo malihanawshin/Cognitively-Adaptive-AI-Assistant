@@ -60,6 +60,10 @@
       overflow-x: auto;
       font-size: 12px;
       margin-top: 8px;
+      color: var(--text-primary);
+    }
+    .message pre code, .message code {
+      color: var(--text-primary);
     }
     .steps-container { background: var(--bg-secondary); border: 1px solid var(--success); border-radius: 6px; padding: 12px; }
     .steps-container h3 { color: var(--success); margin-bottom: 8px; font-size: 12px; }
@@ -198,11 +202,13 @@
     }
 
     function formatContent(content) {
-      return content
-        .replace(/```(\w+)?/g, '<pre><code>')
-        .replace(/```/g, '</code></pre>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\n/g, '<br>');
+      // Replace code blocks first (```...```)
+      let formatted = content.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+      // Then replace inline code (`...`)
+      formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Finally convert newlines to <br>
+      formatted = formatted.replace(/\n/g, '<br>');
+      return formatted;
     }
 
     function showSteps(steps) {
