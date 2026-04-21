@@ -3,7 +3,8 @@
   "displayName": "Cognitively Adaptive AI Assistant",
   "description": "An AI coding assistant with configurable interaction patterns designed for diverse cognitive styles",
   "version": "0.1.0",
-  "publisher": "your-name",
+  "publisher": "Maliha",
+  "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.85.0"
   },
