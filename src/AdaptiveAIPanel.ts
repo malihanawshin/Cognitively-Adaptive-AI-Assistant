@@ -98,6 +98,19 @@ export class AdaptiveAIPanel implements vscode.Disposable {
         const delaySettings = this.settingsManager.getSettings();
         this.panel?.webview.postMessage({ type: 'updateResponseDelay', payload: delaySettings.responseDelay });
         break;
+      case 'cycleFontSize':
+        await this.settingsManager.cycleFontSize();
+        const fontSettings = this.settingsManager.getSettings();
+        this.panel?.webview.postMessage({ type: 'updateFontSize', payload: fontSettings.fontSize });
+        break;
+      case 'toggleHighContrast':
+        {
+          const currentSettings = this.settingsManager.getSettings();
+          await this.settingsManager.setHighContrast(!currentSettings.highContrastEnabled);
+          const newSettings = this.settingsManager.getSettings();
+          this.panel?.webview.postMessage({ type: 'updateHighContrast', payload: newSettings.highContrastEnabled });
+        }
+        break;
       case 'clearHistory':
         this.messageHistory = [];
         break;

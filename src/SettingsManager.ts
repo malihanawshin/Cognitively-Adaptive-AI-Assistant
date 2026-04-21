@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 export type VerbosityLevel = 'brief' | 'standard' | 'detailed';
 export type LLMProviderType = 'openai' | 'anthropic' | 'ollama';
 export type ResponseDelayLevel = 'fast' | 'normal' | 'slow';
+export type FontSizeLevel = 'small' | 'medium' | 'large';
 
 export interface AdaptiveAISettings {
   explanationVerbosity: VerbosityLevel;
@@ -15,6 +16,8 @@ export interface AdaptiveAISettings {
   ollamaBaseUrl: string;
   idleDetectionEnabled: boolean;
   responseDelay: ResponseDelayLevel;
+  fontSize: FontSizeLevel;
+  highContrastEnabled: boolean;
 }
 
 const VERBOSITY_CYCLE: VerbosityLevel[] = ['brief', 'standard', 'detailed'];
@@ -39,6 +42,8 @@ export class SettingsManager {
       ollamaBaseUrl: config.get('ollamaBaseUrl') as string || 'http://localhost:11434',
       idleDetectionEnabled: config.get('idleDetectionEnabled') as boolean || true,
       responseDelay: (config.get('responseDelay') as ResponseDelayLevel) || 'normal',
+      fontSize: (config.get('fontSize') as FontSizeLevel) || 'medium',
+      highContrastEnabled: config.get('highContrastEnabled') as boolean || false,
     };
   }
 
@@ -66,6 +71,19 @@ export class SettingsManager {
 
   async setFocusMode(enabled: boolean): Promise<void> {
     await this.updateSetting('focusModeEnabled', enabled);
+  }
+
+  async cycleFontSize(): Promise<void> {
+    const fontSizes: FontSizeLevel[] = ['small', 'medium', 'large'];
+    const settings = this.getSettings();
+    const currentIndex = fontSizes.indexOf(settings.fontSize);
+    const nextIndex = (currentIndex + 1) % fontSizes.length;
+    await this.updateSetting('fontSize', fontSizes[nextIndex]);
+    vscode.window.showInformationMessage(`Font size set to: ${fontSizes[nextIndex]}`);
+  }
+
+  async setHighContrast(enabled: boolean): Promise<void> {
+    await this.updateSetting('highContrastEnabled', enabled);
   }
 
   private async updateSetting(key: string, value: unknown): Promise<void> {

@@ -74,6 +74,17 @@
           "default": "normal",
           "enum": ["fast", "normal", "slow"],
           "description": "Delay before AI responses appear (fast=instant, normal=slight pause, slow=longer for processing)"
+        },
+        "adaptiveAI.fontSize": {
+          "type": "string",
+          "default": "medium",
+          "enum": ["small", "medium", "large"],
+          "description": "Font size for chat messages"
+        },
+        "adaptiveAI.highContrastEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable high contrast mode for better accessibility"
         }
       }
     },

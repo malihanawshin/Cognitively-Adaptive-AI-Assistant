@@ -37,6 +37,19 @@ export function activate(context: vscode.ExtensionContext) {
     await panel.decomposeTask();
   });
 
+  const cycleFontSizeCmd = vscode.commands.registerCommand('adaptiveAI.cycleFontSize', async () => {
+    await settingsManager.cycleFontSize();
+    const settings = settingsManager.getSettings();
+    panel.panel?.webview.postMessage({ type: 'updateFontSize', payload: settings.fontSize });
+  });
+
+  const toggleHighContrastCmd = vscode.commands.registerCommand('adaptiveAI.toggleHighContrast', async () => {
+    const settings = settingsManager.getSettings();
+    await settingsManager.setHighContrast(!settings.highContrastEnabled);
+    const updatedSettings = settingsManager.getSettings();
+    panel.panel?.webview.postMessage({ type: 'updateHighContrast', payload: updatedSettings.highContrastEnabled });
+  });
+
   // Set initial focus mode state
   focusModeManager.initialize(context);
 
@@ -46,6 +59,8 @@ export function activate(context: vscode.ExtensionContext) {
     cycleVerbosityCmd,
     cycleResponseDelayCmd,
     decomposeTaskCmd,
+    cycleFontSizeCmd,
+    toggleHighContrastCmd,
     panel
   );
 }
