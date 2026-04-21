@@ -1,6 +1,6 @@
 # Cognitively Adaptive AI Assistant
 
-A VS Code extension integrating large language models with cognitively inclusive interaction patterns — designed for diverse cognitive styles.
+A VS Code extension integrating large language models with cognitively inclusive interaction patterns. It is designed for diverse cognitive styles.
 
 ## Features
 
@@ -14,13 +14,15 @@ The AI adapts its explanation style to your preference:
 Suppresses non-essential AI suggestions during active coding sessions. Toggle manually or enable automatic idle detection.
 
 ### Structured Task Decomposition
-Before generating code, the AI breaks your task into numbered steps you must acknowledge — providing explicit structure for those who benefit from it.
+Before generating code, the AI breaks your task into numbered steps you must acknowledge, providing explicit structure for those who benefit from it.
 
 ### Response Speed Control
 Adjustable delay before AI responses appear:
-- **Fast** — Instant responses for quick iterations
-- **Normal** — Slight pause for processing
-- **Slow** — Longer delay for those who need more time between responses
+- **Fast** - Instant responses for quick iterations
+- **Normal** - Slight pause for processing
+- **Slow** - Longer delay for those who need more time between responses
+
+### Configurable Font Size and High Contrast Toggle  
 
 ## Motivation
 
@@ -60,7 +62,7 @@ Press `F5` in VS Code to launch the extension in development mode.
 
 - TypeScript
 - VS Code Extension API
-- OpenAI SDK / Anthropic SDK / Ollama REST API
+- OpenAI SDK
 
 ## Architecture
 
@@ -76,4 +78,4 @@ src/
 
 ## License
 
-MIT
+MIT License
